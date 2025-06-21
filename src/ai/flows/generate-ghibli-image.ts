@@ -15,6 +15,9 @@ import wav from 'wav';
 
 const GenerateGhibliImageInputSchema = z.object({
   prompt: z.string().describe('The text prompt to generate the image from.'),
+  image: z.string().optional().describe(
+    "An image to use as inspiration, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+  ),
 });
 
 export type GenerateGhibliImageInput = z.infer<typeof GenerateGhibliImageInputSchema>;
@@ -29,13 +32,6 @@ export async function generateGhibliImage(input: GenerateGhibliImageInput): Prom
   return generateGhibliImageFlow(input);
 }
 
-const generateGhibliImagePrompt = ai.definePrompt({
-  name: 'generateGhibliImagePrompt',
-  input: {schema: GenerateGhibliImageInputSchema},
-  output: {schema: GenerateGhibliImageOutputSchema},
-  prompt: `Generate a Studio Ghibli-style image based on the following prompt: {{{prompt}}}`,
-});
-
 const generateGhibliImageFlow = ai.defineFlow(
   {
     name: 'generateGhibliImageFlow',
@@ -45,7 +41,7 @@ const generateGhibliImageFlow = ai.defineFlow(
   async input => {
     const {media} = await ai.generate({
       model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      prompt: input.prompt,
+      prompt: input.image ? [{media: {url: input.image}}, {text: input.prompt}] : input.prompt,
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
       },

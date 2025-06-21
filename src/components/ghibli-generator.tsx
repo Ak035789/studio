@@ -2,7 +2,7 @@
 'use client';
 
 import { useFormState, useFormStatus } from 'react-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, ChangeEvent } from 'react';
 import Image from 'next/image';
 import { Download, Sparkles, Image as ImageIcon, Square, RectangleVertical, RectangleHorizontal } from 'lucide-react';
 
@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 
 const initialState: FormState = {
   message: null,
@@ -41,6 +42,7 @@ export function GhibliGenerator() {
   const [state, formAction] = useFormState(generateImageAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedAspectRatio, setSelectedAspectRatio] = useState<'1:1' | '9:16' | '16:9'>('1:1');
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export function GhibliGenerator() {
             description: 'Your magical artwork has been generated.',
         });
         formRef.current?.reset();
+        setImagePreview(null);
     }
   }, [state, toast]);
 
@@ -76,22 +79,44 @@ export function GhibliGenerator() {
         <CardHeader>
           <CardTitle>Create your scene</CardTitle>
           <CardDescription>
-            Describe the scene you want to create. Be as descriptive as you like!
+            Describe the scene you want to create or upload an image to transform.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form ref={formRef} action={formAction} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="prompt">Your Prompt</Label>
+              <Label htmlFor="prompt">Your Prompt (Optional)</Label>
               <Textarea
                 id="prompt"
                 name="prompt"
-                placeholder="e.g., A girl with a straw hat in a field of flowers, watching a train pass by on a sunny day."
+                placeholder="e.g., A girl with a straw hat in a field of flowers, or describe transformations for your uploaded image."
                 className="min-h-[120px]"
-                required
               />
               {state.errors?.prompt && <p className="text-sm font-medium text-destructive">{state.errors.prompt[0]}</p>}
             </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="image">Upload Image (Optional)</Label>
+                <Input id="image" name="image" type="file" accept="image/*" onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                    if (e.target.files?.[0]) {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        reader.onloadend = () => setImagePreview(reader.result as string);
+                        reader.readAsDataURL(file);
+                    } else {
+                        setImagePreview(null);
+                    }
+                }} />
+            </div>
+
+            {imagePreview && (
+              <div className="space-y-2">
+                <Label>Image Preview</Label>
+                <div className="relative aspect-video w-full overflow-hidden rounded-md border">
+                    <Image src={imagePreview} alt="Image Preview" fill className="object-contain" />
+                </div>
+              </div>
+            )}
 
             <div className="space-y-3">
               <Label>Aspect Ratio</Label>
