@@ -15,6 +15,13 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+
 
 const initialState: FormState = {
   message: null,
@@ -33,9 +40,9 @@ function SubmitButton() {
 }
 
 const aspectRatios = [
-  { value: '1:1', label: 'Square', icon: Square },
-  { value: '9:16', label: 'Portrait', icon: RectangleVertical },
-  { value: '16:9', label: 'Landscape', icon: RectangleHorizontal },
+  { value: '1:1', title: 'Square', icon: Square },
+  { value: '9:16', title: 'Portrait', icon: RectangleVertical },
+  { value: '16:9', title: 'Landscape', icon: RectangleHorizontal },
 ] as const;
 
 export function GhibliGenerator() {
@@ -74,7 +81,7 @@ export function GhibliGenerator() {
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+    <form ref={formRef} action={formAction} className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
       <Card className="lg:col-span-2 w-full">
         <CardHeader>
           <CardTitle>Create your scene</CardTitle>
@@ -83,7 +90,7 @@ export function GhibliGenerator() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form ref={formRef} action={formAction} className="space-y-6">
+          <div className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="prompt">Your Prompt (Optional)</Label>
               <Textarea
@@ -120,34 +127,43 @@ export function GhibliGenerator() {
 
             <div className="space-y-3">
               <Label>Aspect Ratio</Label>
-              <RadioGroup
-                name="aspectRatio"
-                defaultValue={selectedAspectRatio}
-                onValueChange={(value: '1:1' | '9:16' | '16:9') => setSelectedAspectRatio(value)}
-                className="grid grid-cols-3 gap-2"
-              >
-                {aspectRatios.map(({ value, label, icon: Icon }) => (
-                  <div key={value}>
-                    <RadioGroupItem value={value} id={value} className="peer sr-only" />
-                    <Label
-                      htmlFor={value}
-                      title={label}
-                      className="flex h-12 items-center justify-center rounded-md border-2 border-muted bg-transparent p-2 hover:bg-accent/50 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
-                    >
-                      <Icon className="h-6 w-6" />
-                    </Label>
-                  </div>
-                ))}
-              </RadioGroup>
+              <TooltipProvider>
+                <RadioGroup
+                  name="aspectRatio"
+                  defaultValue={selectedAspectRatio}
+                  onValueChange={(value: '1:1' | '9:16' | '16:9') => setSelectedAspectRatio(value)}
+                  className="grid grid-cols-3 gap-2"
+                >
+                  {aspectRatios.map(({ value, title, icon: Icon }) => (
+                    <Tooltip key={value}>
+                      <TooltipTrigger asChild>
+                        <div>
+                          <RadioGroupItem value={value} id={value} className="peer sr-only" />
+                          <Label
+                            htmlFor={value}
+                            title={title}
+                            className="flex h-10 w-10 items-center justify-center rounded-md border-2 border-muted bg-transparent p-2 hover:bg-accent/50 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
+                          >
+                            <Icon className="h-5 w-5" />
+                          </Label>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{title}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ))}
+                </RadioGroup>
+              </TooltipProvider>
             </div>
             
             <SubmitButton />
-          </form>
+          </div>
         </CardContent>
       </Card>
 
       <div className="lg:col-span-3">
-        <Card className="w-full h-auto aspect-square"
+        <Card className="w-full h-auto"
             style={{ 
                 aspectRatio: selectedAspectRatio.replace(':', ' / ')
             }}
@@ -160,14 +176,14 @@ export function GhibliGenerator() {
         </Card>
          {state.image && (
           <div className="mt-4 flex justify-center">
-            <Button onClick={handleDownload} variant="secondary">
+            <Button onClick={handleDownload} variant="secondary" type="button">
               <Download className="mr-2 h-4 w-4" />
               Download Image
             </Button>
           </div>
         )}
       </div>
-    </div>
+    </form>
   );
 }
 
