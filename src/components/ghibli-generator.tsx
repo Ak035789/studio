@@ -124,17 +124,17 @@ export function GhibliGenerator() {
                 name="aspectRatio"
                 defaultValue={selectedAspectRatio}
                 onValueChange={(value: '1:1' | '9:16' | '16:9') => setSelectedAspectRatio(value)}
-                className="grid grid-cols-3 gap-4"
+                className="grid grid-cols-3 gap-2"
               >
                 {aspectRatios.map(({ value, label, icon: Icon }) => (
                   <div key={value}>
                     <RadioGroupItem value={value} id={value} className="peer sr-only" />
                     <Label
                       htmlFor={value}
-                      className="flex flex-col items-center justify-center rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent/50 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
+                      title={label}
+                      className="flex h-12 items-center justify-center rounded-md border-2 border-muted bg-transparent p-2 hover:bg-accent/50 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer transition-colors"
                     >
-                      <Icon className="mb-2 h-6 w-6" />
-                      {label}
+                      <Icon className="h-6 w-6" />
                     </Label>
                   </div>
                 ))}
