@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
-import { useEffect, useState, useRef, ChangeEvent } from 'react';
+import { useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useState, useRef, ChangeEvent } from 'react';
 import Image from 'next/image';
 import { Download, Sparkles, Image as ImageIcon, Square, RectangleVertical, RectangleHorizontal } from 'lucide-react';
 
@@ -39,7 +39,7 @@ const aspectRatios = [
 ] as const;
 
 export function GhibliGenerator() {
-  const [state, formAction] = useFormState(generateImageAction, initialState);
+  const [state, formAction] = useActionState(generateImageAction, initialState);
   const { toast } = useToast();
   const formRef = useRef<HTMLFormElement>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
